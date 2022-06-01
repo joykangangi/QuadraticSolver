@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">QuadraticSolver</string>
+    <string name="quad_title">Quadratic Equation Solver</string>
+    <string name="intro_text">Solve an equation of the form:</string>
+    <string name="form">ax² + bx + c = 0 </string>
+    <string name="enter_text">Enter values of a, b and c below:</string>
 </resources>
