@@ -3,6 +3,7 @@ package com.example.quadraticsolver
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
@@ -21,9 +22,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.viewModelScope
 import com.example.quadraticsolver.ui.theme.QuadraticSolverTheme
 
 class MainActivity : ComponentActivity() {
+    private val viewmodel: CalculatorViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -33,7 +36,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                 MyApp()
+                 MyApp(viewmodel)
                 }
             }
         }
@@ -41,7 +44,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp() {
+fun MyApp(viewModel: CalculatorViewModel) {
+
     Scaffold(
         topBar = {
             TopAppBar {
@@ -51,23 +55,22 @@ fun MyApp() {
             }
         }
     ) { paddingValues -> 
-        CalculateForm(Modifier.padding(paddingValues))
+        CalculateForm(Modifier.padding(paddingValues), viewModel = viewModel)
+        DisplayResults(message = viewModel.messText, answer = viewModel.answerText )
     }
 }
 
 @Composable
-fun CalculateForm(modifier: Modifier = Modifier) {
-    var a by remember { mutableStateOf("") }
-    var b by remember { mutableStateOf("") }
-    var c by remember { mutableStateOf("") }
+fun CalculateForm(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
+    var a by remember { mutableStateOf(viewModel.a) }
+    var b by remember { mutableStateOf(viewModel.b) }
+    var c by remember { mutableStateOf(viewModel.c) }
 
-    val validBC = remember(b,c) {
-        (b.isNotEmpty() || b.isDigitsOnly() )&&( c.isNotEmpty() || c.isDigitsOnly())
-    }
-
+/*
     val validA = remember(a){
         ( a.isNotEmpty() || a.isDigitsOnly()) || a.all { it.digitToInt() != 0 }
     }
+    */
     Surface(
         modifier
             .fillMaxWidth()
@@ -95,9 +98,9 @@ fun CalculateForm(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = modifier.height(8.dp))
             OutlinedTextField(
-                value = a,
-                onValueChange = { a = it },
-                isError = validA,
+                value = a.toString(),
+                onValueChange = { a = it.toInt() },
+                isError = viewModel.validateInput(a = a.toFloat()),
                 label = { Text(text = "Value of a") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -106,9 +109,8 @@ fun CalculateForm(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = modifier.height(10.dp))
             OutlinedTextField(
-                value = b,
-                onValueChange = { b = it },
-                isError = validBC,
+                value = b.toString(),
+                onValueChange = { b = it.toInt() },
                 label = { Text(text = "Value of b") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -117,9 +119,8 @@ fun CalculateForm(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = modifier.height(10.dp))
             OutlinedTextField(
-                value = c,
-                onValueChange = { c = it },
-                isError = validBC,
+                value = c.toString(),
+                onValueChange = { c = it.toInt() },
                 label = { Text(text = "Value of c") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -134,15 +135,15 @@ fun CalculateForm(modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
-                    enabled = validA || validBC
+                    onClick = { viewModel.calculate(a,b,c) },
+                    enabled = viewModel.validateInput(a = a.toFloat(), b = b.toFloat(), c = c.toFloat())
                 ) {
                     Text(text = "CALCULATE")
                 }
                 Button(onClick = {
-                    a = ""
-                    b = ""
-                    c = ""
+                    a = "".toInt()
+                    b = "".toInt()
+                    c = "".toInt()
                     //onResetClicked()
                 }) {
                     Text(text = "RESET")
@@ -152,10 +153,25 @@ fun CalculateForm(modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+fun DisplayResults(message: String, answer: String) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)) {
+        Text(text = message)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = answer )
+    }
+    
+}
+
+
+
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     QuadraticSolverTheme {
-        MyApp()
+        MyApp(CalculatorViewModel())
     }
 }
