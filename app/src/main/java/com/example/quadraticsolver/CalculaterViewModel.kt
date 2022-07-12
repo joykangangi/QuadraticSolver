@@ -9,62 +9,73 @@ import kotlin.math.sqrt
 
 //manage state and calculations here
 class CalculatorViewModel: ViewModel() {
-    var state by mutableStateOf(CalculatorState())
-
+    var state by mutableStateOf(CalculatorFormState(formValid = false))
         private set //similar to backing property
+    private var _root1: String = ""
+    val root1 get() = _root1
+
+    private var _root2: String = ""
+    val root2 get() = _root2
+
+    private var _message: String = ""
+    val message get() = _message
+
 
     fun onAction(action: CalculatorAction) {
         when (action) {
-            CalculatorAction.Calculate -> doCalculation()
-            CalculatorAction.Reset -> state = CalculatorState() //initial state of the form
-           // is CalculatorAction.Number -> enterNumber(action.number)
+            is CalculatorAction.NumberA -> {
+                state = state.copy(
+                    numberA = state.numberA.copy(
+                        text = action.aNumber.toString()
+                    )
+                )
+            }
+            is CalculatorAction.NumberB -> {
+                state = state.copy(
+                    numberB = state.numberB.copy(
+                        text = action.bNumber.toString()
+                    )
+                )
+            }
+            is CalculatorAction.NumberC -> {
+                state = state.copy(
+                    numberC = state.numberC.copy(
+                        text = action.cNumber.toString()
+                    )
+                )
+            }
+            CalculatorAction.Calculate -> doCalculation(
+                state.numberA.text.toFloat(),
+                state.numberB.text.toFloat(),
+                state.numberC.text.toFloat()
+            )
+            CalculatorAction.Reset -> {
+                state.numberA.text = ""
+                state.numberB.text = ""
+                state.numberC.text = ""
+            } //initial state of the form
         }
     }
-/*
-    private fun enterNumber(number: Float) {
-        this.state.numberA = number.toString()
-    }
 
- */
+   private fun doCalculation(aNumber: Float, bNumber: Float, cNumber: Float) {
+        val d = (bNumber * bNumber) - (4 * aNumber * cNumber) //discriminant
 
-    private fun doCalculation() {
-        val aNumber = state.numberA.toFloatOrNull()
-        val bNumber = state.numberB.toFloatOrNull()
-        val cNumber = state.numberC.toFloatOrNull()
-
-        val root1: Float
-        val root2: Float
-        val message: String
-
-        if (aNumber != null && bNumber != null && cNumber != null) {
-            val d = (bNumber * bNumber) - (4 * aNumber * cNumber) //discriminant
-
-            when {
-                d > 0 -> {
-                    message = "Roots are real and different"
-                    root1 = (-bNumber + sqrt(d)) / (2 * aNumber)
-                    root2 = (-bNumber - sqrt(d)) / (2 * aNumber)
-                }
-                d == 0.0F -> {
-                    message = "Roots are real and equal"
-                    root1 = (-bNumber + sqrt(d)) / (2 * aNumber)
-                    root2 = (-bNumber - sqrt(d)) / (2 * aNumber)
-                }
-                else -> {
-                    message = "Roots are imaginary/complex"
-                    root1 = (-bNumber + sqrt(d)) / (2 * aNumber)
-                    root2 = (-bNumber - sqrt(d)) / (2 * aNumber)
-                }
+        when {
+            d > 0 -> {
+                _message = "Roots are real and different"
+                _root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
+                _root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
             }
-            state = state.copy(
-                numberA = aNumber.toString(),
-                numberB = bNumber.toString(),
-                numberC = cNumber.toString(),
-                rootMessage = message,
-                answer1 = root1.toString().format("%.4f"),
-                answer2 = root2.toString().format("%.4f"),
-                isEnabled = true
-            )
+            d == 0.0F -> {
+                _message = "Roots are real and equal"
+                _root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
+                _root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
+            }
+            else -> {
+                _message = "Roots are imaginary/complex"
+                _root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
+                _root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
+            }
         }
     }
 }
