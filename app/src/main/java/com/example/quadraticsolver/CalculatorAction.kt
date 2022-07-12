@@ -6,7 +6,10 @@ package com.example.quadraticsolver
 
 sealed interface CalculatorAction {
     //send number to the view Model
-    //data class Number(val number: Float): CalculatorAction
-    object Reset: CalculatorAction
-    object Calculate: CalculatorAction
+    data class NumberA(val aNumber: Float) : CalculatorAction
+    data class NumberB(val bNumber: Float) : CalculatorAction
+    data class NumberC(val cNumber: Float) : CalculatorAction
+
+    object Reset : CalculatorAction
+    object Calculate : CalculatorAction
 }

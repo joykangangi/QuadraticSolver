@@ -2,11 +2,15 @@ package com.example.quadraticsolver
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,11 +25,30 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CalculateForm(
     modifier: Modifier = Modifier,
-    onAction: (CalculatorAction) -> Unit,
-    viewModel: CalculatorViewModel
-    // hoisted to main Activity, call the viewmodel w/action
-)
-{
+    onAction: (CalculatorAction) -> Unit,// hoisted to main Activity, call the viewmodel w/action
+    calculatorViewModel: CalculatorViewModel
+
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = scrollState),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        InputForm(modifier, calculatorViewModel, onAction)
+        DisplayAns(calculatorViewModel = calculatorViewModel, modifier = modifier )
+
+    }
+}
+
+@Composable
+fun InputForm(
+    modifier: Modifier,
+    calculatorViewModel: CalculatorViewModel,
+    onAction: (CalculatorAction) -> Unit
+) {
     Surface(
         modifier
             .fillMaxWidth()
@@ -37,6 +60,18 @@ fun CalculateForm(
             modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val calculatorFormState = calculatorViewModel.state
+            val numA = remember {
+                mutableStateOf(calculatorFormState.numberA.text)
+            }
+            val numB = remember {
+                mutableStateOf(calculatorFormState.numberB.text)
+            }
+            val numC = remember {
+                mutableStateOf(calculatorFormState.numberC.text)
+            }
+
+
             Text(
                 text = stringResource(id = R.string.intro_text),
                 style = MaterialTheme.typography.h5,
@@ -53,25 +88,22 @@ fun CalculateForm(
             )
             Spacer(modifier = modifier.height(8.dp))
             OutlinedTextField(
-                value = viewModel.state.numberA,
-                onValueChange = { viewModel.state.numberA = it } ,
-                isError = (viewModel.state.numberA.all { it.digitToInt() == 0 }) ,
-                label = { Text(text = "Value of a") },
+                value = numA.value,
+                onValueChange = { numA.value = it },
+                label = { Text("Value of a") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 )
             )
-            if (viewModel.state.numberA.all { it.digitToInt() == 0 })
-                Text(
-                    text = "a cannot be 0 to be a quadratic equation",
-                    color = Color.Red
-                )
+            if (numA.value.all { it.code.toFloat() == 0.0F })
+                Text(text = "Value of a can't be 0 to be quadratic", color = Color.Red)
+
             Spacer(modifier = modifier.height(10.dp))
             OutlinedTextField(
-                value = viewModel.state.numberB,
-                onValueChange = { viewModel.state.numberB = it },
-                label = { Text(text = "Value of b") },
+                value = numB.value,
+                onValueChange = { numB.value = it },
+                label = { Text("Value of b") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
@@ -79,9 +111,9 @@ fun CalculateForm(
             )
             Spacer(modifier = modifier.height(10.dp))
             OutlinedTextField(
-                value = viewModel.state.numberC,
-                onValueChange = { viewModel.state.numberC = it },
-                label = { Text(text = "Value of c") },
+                value = numC.value,
+                onValueChange = { numC.value = it },
+                label = { Text("Value of c") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done
@@ -97,42 +129,49 @@ fun CalculateForm(
                 Button(
                     onClick = {
                         onAction(CalculatorAction.Calculate)
-                              },
-                    enabled = viewModel.state.isEnabled
+                    },
+                    enabled = numA.value.isNotEmpty() || numB.value.isNotEmpty() || numC.value.isNotEmpty()
                 ) {
                     Text(text = "CALCULATE")
                 }
                 Button(
                     onClick = {
-                        onAction(CalculatorAction.Reset)
+                        onAction(CalculatorAction.Calculate)
                     },
-                    enabled = viewModel.state.isEnabled) {
+                    enabled = numA.value.isNotEmpty() || numB.value.isNotEmpty() || numC.value.isNotEmpty()
+                ) {
                     Text(text = "RESET")
                 }
             }
         }
     }
-    Spacer(modifier = Modifier.height(4.dp))
-    //Display results
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)) {
-        Text(text = viewModel.state.rootMessage)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = viewModel.state.answer1,
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(vertical = 32.dp),
-            fontSize = 80.sp )
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            text = viewModel.state.answer2,
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(vertical = 32.dp),
-            fontSize = 80.sp )
-    }
 }
 
-
+//Display results
+@Composable
+fun DisplayAns(calculatorViewModel: CalculatorViewModel, modifier: Modifier) {
+    Spacer(modifier = Modifier.height(4.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(text = "Ans: ${calculatorViewModel.message}")
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = calculatorViewModel.root1,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 32.dp),
+            fontSize = 80.sp
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = calculatorViewModel.root2,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 32.dp),
+            fontSize = 80.sp
+        )
+    }
+}

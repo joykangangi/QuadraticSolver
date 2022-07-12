@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
         ) { paddingValues ->
             CalculateForm(
                 modifier = Modifier.padding(paddingValues),
-                viewModel = viewModel,
+                calculatorViewModel = viewModel,
                 onAction = viewModel::onAction
             )
         }
