@@ -1,5 +1,5 @@
 package com.example.quadraticsolver
-
+/*
 data class CalculatorFormState(
     val numberA: InputState = InputState(),
     val numberB: InputState = InputState(),
@@ -16,3 +16,4 @@ data class InputState(
     val type: Float = Float.MIN_VALUE,
     val errorMessage: String = ""
 )
+ */

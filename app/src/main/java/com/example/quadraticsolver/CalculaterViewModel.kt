@@ -7,79 +7,51 @@ import androidx.lifecycle.ViewModel
 import kotlin.math.sqrt
 
 
-//manage state and calculations here
-class CalculatorViewModel: ViewModel() {
-    var state by mutableStateOf(CalculatorFormState(formValid = false))
-        private set //similar to backing property
-    private var _root1: String = ""
-    val root1 get() = _root1
+//do calculations here
+class CalculatorViewModel : ViewModel() {
+    var root1 by mutableStateOf("")
+    var root2 by mutableStateOf("")
+    var message by mutableStateOf("")
 
-    private var _root2: String = ""
-    val root2 get() = _root2
+    fun doCalculation(a: String, b: String, c: String) {
+        try {
+            val aNumber = a.toFloat()
+            val bNumber = b.toFloat()
+            val cNumber = c.toFloat()
 
-    private var _message: String = ""
-    val message get() = _message
+            val d = (bNumber * bNumber) - (4 * aNumber * cNumber) //discriminant
 
+            when {
+                d > 0 -> {
+                    message = "Roots are real and different"
+                    root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
+                    root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
+                }
+                d == 0.0F -> {
+                    message = "Roots are real and same"
+                    root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
+                    root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
+                }
+                else -> {
+                    /*
+                    realPart = -b/(2*a);
+imaginaryPart = Math.sqrt(-discriminant)/(2*a);
+System.out.print(“root1 = ” + realPart + “+” + imaginaryPart + “and root2 = ” + realPart + “+” + imaginaryPart);
+}
+                     */
+                    val realPart = ((-bNumber) / (2*aNumber))
+                    val imaginaryPart = sqrt(((-d) / (2*aNumber)) )
+                    message = "Roots are imaginary/complex"
+                    root1 = ("$realPart + $imaginaryPart i")
+                    root2 = ("$realPart - $imaginaryPart i")
+                }
+            }
+        } catch (e: Exception) {
+            message = "Invalid Number"
 
-    fun onAction(action: CalculatorAction) {
-        when (action) {
-            is CalculatorAction.NumberA -> {
-                state = state.copy(
-                    numberA = state.numberA.copy(
-                        text = action.aNumber.toString()
-                    )
-                )
-            }
-            is CalculatorAction.NumberB -> {
-                state = state.copy(
-                    numberB = state.numberB.copy(
-                        text = action.bNumber.toString()
-                    )
-                )
-            }
-            is CalculatorAction.NumberC -> {
-                state = state.copy(
-                    numberC = state.numberC.copy(
-                        text = action.cNumber.toString()
-                    )
-                )
-            }
-            CalculatorAction.Calculate -> doCalculation(
-                state.numberA.text.toFloat(),
-                state.numberB.text.toFloat(),
-                state.numberC.text.toFloat()
-            )
-            CalculatorAction.Reset -> {
-                state.numberA.text = ""
-                state.numberB.text = ""
-                state.numberC.text = ""
-            } //initial state of the form
-        }
-    }
-
-   private fun doCalculation(aNumber: Float, bNumber: Float, cNumber: Float) {
-        val d = (bNumber * bNumber) - (4 * aNumber * cNumber) //discriminant
-
-        when {
-            d > 0 -> {
-                _message = "Roots are real and different"
-                _root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
-                _root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
-            }
-            d == 0.0F -> {
-                _message = "Roots are real and equal"
-                _root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
-                _root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
-            }
-            else -> {
-                _message = "Roots are imaginary/complex"
-                _root1 = ((-bNumber + sqrt(d)) / (2 * aNumber)).toString()
-                _root2 = ((-bNumber - sqrt(d)) / (2 * aNumber)).toString()
-            }
         }
     }
 }
-
 
 
 /*

@@ -3,7 +3,6 @@ package com.example.quadraticsolver
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -12,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.quadraticsolver.ui.theme.QuadraticSolverTheme
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: CalculatorViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -26,8 +25,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun MyApp() {
-
+    fun MyApp(calculatorViewModel: CalculatorViewModel = viewModel()) {
         Scaffold(
             topBar = {
                 TopAppBar {
@@ -39,8 +37,16 @@ class MainActivity : ComponentActivity() {
         ) { paddingValues ->
             CalculateForm(
                 modifier = Modifier.padding(paddingValues),
-                calculatorViewModel = viewModel,
-                onAction = viewModel::onAction
+                root1 = calculatorViewModel.root1,
+                root2 = calculatorViewModel.root2,
+                message = calculatorViewModel.message,
+                onCalculate = { a: String, b: String, c: String ->
+                    calculatorViewModel.doCalculation(
+                        a = a,
+                        b = b,
+                        c = c
+                    )
+                }
             )
         }
     }

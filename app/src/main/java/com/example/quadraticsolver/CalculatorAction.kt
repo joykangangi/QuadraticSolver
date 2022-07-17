@@ -4,6 +4,7 @@ package com.example.quadraticsolver
  * What actions users can perform on a screen, i.e. events
  */
 
+/*
 sealed interface CalculatorAction {
     //send number to the view Model
     data class NumberA(val aNumber: Float) : CalculatorAction
@@ -13,3 +14,4 @@ sealed interface CalculatorAction {
     object Reset : CalculatorAction
     object Calculate : CalculatorAction
 }
+ */
